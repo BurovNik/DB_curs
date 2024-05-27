@@ -118,6 +118,7 @@ class CargoListDialog(QDialog):
         layout.addWidget(table_widget)
         self.setLayout(layout)
 
+# диалоговое окно, где выводится информация о лучших работниках по каждой посылке
 class BestSenders(QDialog):
     def __init__(self, results, parent=None):
         super().__init__(parent)
@@ -137,6 +138,7 @@ class BestSenders(QDialog):
         layout.addWidget(table_widget)
         self.setLayout(layout)
 
+# диалоговое окно, где выводится информация когда была совершена первая отправка
 class FisrtCargo(QDialog):
     def __init__(self, results, parent=None):
         super().__init__(parent)
@@ -157,6 +159,7 @@ class FisrtCargo(QDialog):
         layout.addWidget(table_widget)
         self.setLayout(layout)
 
+# диалоговое окно, запрашивающее ФИО клиента для дальнейше работы
 class ClientInputDialog(QDialog):
     def __init__(self, parent=None):
         super(ClientInputDialog, self).__init__(parent)
@@ -178,6 +181,7 @@ class ClientInputDialog(QDialog):
     def get_client_fio(self):
         return self.client_edit.text()
 
+# диалоговое окно где выводится информация о днях, в которые сотрудник принимал или отправлял посылку.
 class WorkingDay(QDialog):
     def __init__(self, results, parent=None):
         super().__init__(parent)
@@ -218,50 +222,73 @@ class MainWindow(QWidget):
         layout = QHBoxLayout()
 
         # Левая часть - Таблица сотрудников
-        table_widget = QTableWidget()
-        table_widget.setColumnCount(len(self.employers_df.columns))
-        table_widget.setHorizontalHeaderLabels(["ID", "Имя", "Фамилия", "Отчество", "Паспорт", "Должность", "Отделение"])
-        table_widget.setRowCount(len(self.employers_df))
-        for row in range(len(self.employers_df)):
-            for col in range(len(self.employers_df.columns)):
+        self.table_widget = QTableWidget()
+        self.fill_main_table()
+        # self.table_widget.setColumnCount(len(self.employers_df.columns))
+        # self.table_widget.setHorizontalHeaderLabels(["ID", "Имя", "Фамилия", "Отчество", "Паспорт", "Должность", "Отделение"])
+        # self.table_widget.setRowCount(len(self.employers_df))
+        # for row in range(len(self.employers_df)):
+        #     for col in range(len(self.employers_df.columns)):
+        #
+        #         item = QTableWidgetItem(str(self.employers_df[col][row]))
+        #         self.table_widget.setItem(row, col, item)
 
-                item = QTableWidgetItem(str(self.employers_df[col][row]))
-                table_widget.setItem(row, col, item)
-
-        layout.addWidget(table_widget)
+        layout.addWidget(self.table_widget)
 
         # Правая часть - поля для заполнения и кнопки
         right_panel_layout = QVBoxLayout()
 
-        label1 = QLabel("Имя:")
-        edit1 = QLineEdit()
-        right_panel_layout.addWidget(label1)
-        right_panel_layout.addWidget(edit1)
+        self.label0 = QLabel("ID: (Поле нужно для навигации по таблице)")
+        self.edit0 = QLineEdit()
+        right_panel_layout.addWidget(self.label0)
+        right_panel_layout.addWidget(self.edit0)
 
-        label2 = QLabel("Фамилия:")
-        edit2 = QLineEdit()
-        right_panel_layout.addWidget(label2)
-        right_panel_layout.addWidget(edit2)
+        self.label1 = QLabel("Имя:")
+        self.edit1 = QLineEdit()
+        right_panel_layout.addWidget(self.label1)
+        right_panel_layout.addWidget(self.edit1)
 
-        label3 = QLabel("Отчество:")
-        edit3 = QLineEdit()
-        right_panel_layout.addWidget(label3)
-        right_panel_layout.addWidget(edit3)
+        self.label2 = QLabel("Фамилия:")
+        self.edit2 = QLineEdit()
+        right_panel_layout.addWidget(self.label2)
+        right_panel_layout.addWidget(self.edit2)
 
-        label4 = QLabel("Паспорт:")
-        edit4 = QLineEdit()
-        right_panel_layout.addWidget(label4)
-        right_panel_layout.addWidget(edit4)
+        self.label3 = QLabel("Отчество:")
+        self.edit3 = QLineEdit()
+        right_panel_layout.addWidget(self.label3)
+        right_panel_layout.addWidget(self.edit3)
 
-        label5 = QLabel("Должность:")
-        edit5 = QLineEdit()
-        right_panel_layout.addWidget(label5)
-        right_panel_layout.addWidget(edit5)
+        self.label4 = QLabel("Паспорт:")
+        self.edit4 = QLineEdit()
+        right_panel_layout.addWidget(self.label4)
+        right_panel_layout.addWidget(self.edit4)
 
-        label6 = QLabel("Отделение:")
-        edit6 = QLineEdit()
-        right_panel_layout.addWidget(label6)
-        right_panel_layout.addWidget(edit6)
+        self.label5 = QLabel("Должность:")
+        self.edit5 = QLineEdit()
+        right_panel_layout.addWidget(self.label5)
+        right_panel_layout.addWidget(self.edit5)
+
+        self.label6 = QLabel("Отделение:")
+        self.edit6 = QLineEdit()
+        right_panel_layout.addWidget(self.label6)
+        right_panel_layout.addWidget(self.edit6)
+
+        # Создание кнопок и их обработчиков
+        button_layout = QHBoxLayout()
+
+        add_button = QPushButton("Добавить")
+        add_button.clicked.connect(self.add_employee)
+        button_layout.addWidget(add_button)
+
+        delete_button = QPushButton("Удалить")
+        delete_button.clicked.connect(self.delete_employee)
+        button_layout.addWidget(delete_button)
+
+        show_button = QPushButton("Показать")
+        show_button.clicked.connect(self.show_employee)
+        button_layout.addWidget(show_button)
+
+        right_panel_layout.addLayout(button_layout)
 
         cargo_by_type_button = QPushButton("Показать распределение по типам посылки")
         cargo_by_type_button.clicked.connect(self.show_department_dialog)
@@ -307,7 +334,7 @@ class MainWindow(QWidget):
 
         self.setLayout(layout)
 
-    def fill_main_table(self, table_widget):
+    def fill_main_table(self):
         self.cursor = self.connection.cursor()
         sql = "SELECT * FROM employers;"
         self.cursor.execute(sql)
@@ -315,15 +342,90 @@ class MainWindow(QWidget):
         self.cursor.close()
         self.employers_df = pd.DataFrame(results)
 
-        table_widget.setColumnCount(len(self.employers_df.columns))
-        table_widget.setHorizontalHeaderLabels(
+        self.table_widget.setColumnCount(len(self.employers_df.columns))
+        self.table_widget.setHorizontalHeaderLabels(
             ["ID", "Имя", "Фамилия", "Отчество", "Паспорт", "Должность", "Отделение"])
-        table_widget.setRowCount(len(self.employers_df))
+        self.table_widget.setRowCount(len(self.employers_df))
         for row in range(len(self.employers_df)):
             for col in range(len(self.employers_df.columns)):
                 item = QTableWidgetItem(str(self.employers_df[col][row]))
-                table_widget.setItem(row, col, item)
+                self.table_widget.setItem(row, col, item)
 
+    def add_employee(self):
+        # Получение данных из QLineEdit
+        name = self.edit1.text()
+        surname = self.edit2.text()
+        patronymic = self.edit3.text()
+        passport = self.edit4.text()
+        position = self.edit5.text()
+        department = self.edit6.text()
+
+        if '' in [name, surname, passport, position, department]:
+            QMessageBox.warning(self, 'Предупреждение', 'Заполнены не все поля, кроме Отчества')
+        else:
+            self.edit1.clear()
+            self.edit2.clear()
+            self.edit3.clear()
+            self.edit4.clear()
+            self.edit5.clear()
+            self.edit6.clear()
+
+
+            # Добавление сотрудника в БД
+            sql = ("INSERT INTO employers (employer_pasport_data, employer_name, employer_surname, "
+                   "employer_patronymic, employer_job_title, employer_department_id) VALUES(%s, %s, %s, %s, %s, %s);")
+            data = (passport, name, surname, patronymic,  position, department)
+            cursor = self.connection.cursor()
+            cursor.execute(sql, data)
+            self.connection.commit()
+
+            self.fill_main_table()
+
+
+
+
+    def delete_employee(self):
+        # Логика удаления сотрудника из БД
+        # Получение данных из QLineEdit
+        name = self.edit1.text()
+        surname = self.edit2.text()
+        patronymic = self.edit3.text()
+        passport = self.edit4.text()
+        position = self.edit5.text()
+        department = self.edit6.text()
+
+        if '' in [name, surname, passport, position, department]:
+            QMessageBox.warning(self, 'Предупреждение', 'Заполнены не все поля, кроме Отчества')
+        else:
+            self.edit1.clear()
+            self.edit2.clear()
+            self.edit3.clear()
+            self.edit4.clear()
+            self.edit5.clear()
+            self.edit6.clear()
+
+            # Добавление сотрудника в БД
+            sql = ("DELETE FROM employers WHERE  employer_pasport_data = %s"
+                   "AND  employer_name = %s AND employer_surname = %s "
+                   "AND employer_patronymic = %s AND employer_job_title = %s"
+                   "AND employer_department_id = %s;")
+            data = (passport, name, surname, patronymic, position, department)
+            cursor = self.connection.cursor()
+            cursor.execute(sql, data)
+            self.connection.commit()
+
+            self.fill_main_table()
+
+        pass
+
+    def show_employee(self):
+        self.layout()
+        id_to_show = int(self.edit0.text())  # Get the ID entered by the user
+        for row in range(len(self.employers_df)):
+            current_id = int(self.table_widget.item(row, 0).text())  # Assuming ID is in the first column
+            if current_id == id_to_show:
+                self.table_widget.selectRow(row)  # Select the row if the ID matches
+                break  # Stop after selecting the first matching row
 
     def show_department_dialog(self):
         department_dialog = DepartmentInputDialog(self)
