@@ -403,17 +403,20 @@ class MainWindow(QWidget):
             self.edit4.clear()
             self.edit5.clear()
             self.edit6.clear()
-
-            # Добавление сотрудника в БД
-            sql = ("DELETE FROM employers WHERE  employer_pasport_data = %s"
-                   "AND  employer_name = %s AND employer_surname = %s "
-                   "AND employer_patronymic = %s AND employer_job_title = %s"
-                   "AND employer_department_id = %s;")
-            data = (passport, name, surname, patronymic, position, department)
-            cursor = self.connection.cursor()
-            cursor.execute(sql, data)
-            self.connection.commit()
-
+            try:
+                # Добавление сотрудника в БД
+                sql = ("DELETE FROM employers WHERE  employer_pasport_data = %s"
+                       "AND  employer_name = %s AND employer_surname = %s "
+                       "AND employer_patronymic = %s AND employer_job_title = %s"
+                       "AND employer_department_id = %s;")
+                data = (passport, name, surname, patronymic, position, department)
+                cursor = self.connection.cursor()
+                cursor.execute(sql, data)
+                cursor.close()
+                self.connection.commit()
+            except pymysql.Error as error:
+                    # Проверяем, что сообщение требует прав администратора
+                    QMessageBox.warning(self, 'Предупреждение', "Вы не обладаете правами для удаления Директора")
             self.fill_main_table()
 
         pass
